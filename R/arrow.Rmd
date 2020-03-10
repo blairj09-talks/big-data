@@ -1,0 +1,96 @@
+---
+title: "Arrow Experiments"
+output: html_notebook
+---
+
+This notebook is for experimenting with the `arrow` R package. For more detailed
+information, please read through [the
+vignette](https://arrow.apache.org/docs/r/articles/dataset.html).
+
+```{r setup}
+# Packages ----
+library(arrow)
+library(lobstr)
+library(tidyverse)
+library(fs)
+library(tictoc)
+
+# Utils ----
+write_chunk_data <- function(data_path, output_dir, chunk_size = 10000000) {
+  if (!fs::dir_exists(output_dir)) fs::dir_create(output_dir)
+  data_name <- fs::path_ext_remove(fs::path_file(data_path))
+  chunk_num <- 0
+  data_chunk <- vroom::vroom(data_path, n_max = chunk_size)
+  data_names <- names(data_chunk)
+  arrow::write_parquet(data_chunk, fs::path(output_dir, glue::glue("{data_name}-{chunk_num}.parquet")))
+  while (nrow(data_chunk) == chunk_size) {
+    chunk_num <- chunk_num + 1
+    data_chunk <- vroom::vroom(data_path, skip = chunk_num * chunk_size, n_max = chunk_size, col_names = data_names)
+    arrow::write_parquet(data_chunk, fs::path(output_dir, glue::glue("{data_name}-{chunk_num}.parquet")))
+  }
+}
+```
+
+## Data
+Data was downloaded from [NYC
+OpenData](https://data.cityofnewyork.us/browse?q=taxi) and contains details
+about NYC taxi trips. The following code takes raw .csv files and chunks them
+into smaller parquet files so the entire dataset can be queried from within R
+using `arrow`.
+```{r create-data}
+Sys.setenv("big_data.dir" = "~/data/nyc_taxi")
+data_dir <- Sys.getenv("big_data.dir")
+if (length(dir_ls(path(data_dir, "parquet"), recurse = TRUE)) == 0) {
+  csvs <- dir_ls(data_dir, glob = "*.csv")
+  if (length(csvs) == 0) stop(paste("No csv files found in", data_dir))
+  walk(csvs, write_chunk_data, path(data_dir, "parquet"))
+}  
+dir_ls(path(data_dir, "parquet"))
+```
+
+## Arrow
+Use arrow to read in data from directory of parquet files.
+```{r read-data}
+taxi_a <- open_dataset(path_expand(path(data_dir, "parquet")), partitioning = "year")
+class(taxi_a)
+obj_size(taxi_a)
+```
+
+```{r}
+taxi_a
+```
+
+Compare object size to a single file read into R from parquet
+```{r single-file-size}
+taxi_0 <- read_parquet(path(data_dir, "parquet/2017/2017-taxi-data-0.parquet"))
+obj_size(taxi_0)
+rm(taxi_0)
+```
+
+Column names
+```{r col-names}
+names(taxi_a)
+```
+
+## Arrow + dplyr
+```{r}
+taxi_a %>% 
+  # collect() %>% 
+  tally()
+```
+
+What's the median tip percentage for rides costing more than $100 in 2017
+```{r}
+tic()
+taxi_a %>% 
+  filter(total_amount > 100, year == 2017) %>% 
+  select(tip_amount, total_amount, passenger_count) %>% 
+  group_by(passenger_count) %>% 
+  collect() %>%   # bring small partition into R
+  summarize(
+    tip_pct = median(100 * tip_amount / total_amount),
+    n = n()
+  )
+toc()
+```
+
