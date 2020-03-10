@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.nb.html
+config.yml
+logs
+spark-warehouse
