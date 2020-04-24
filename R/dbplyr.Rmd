@@ -5,7 +5,6 @@ output: html_notebook
 
 ```{r setup}
 library(connections)
-library(RSQLite)
 library(dplyr)
 library(dbplyr)
 library(config)
@@ -13,7 +12,7 @@ library(config)
 
 # Databases and `dplyr`
 
-## Intro to `connections`
+## Connecting
 *Use `connections` to open open a database connection*
 
 Use `connection_open()` to open a Database connection
@@ -39,7 +38,7 @@ Load the `dplyr` package
 library(dplyr)
 ```
 
-Add `in_schema()` as an argument to `tbl()` to specify the schema
+Use `tbl()` to reference the "customer" table
 ```{r}
 tbl(con, "customer")
 ```

@@ -5,24 +5,47 @@ output: html_notebook
 
 ```{r setup}
 library(DBI)
+library(connections)
 
 knitr::opts_chunk$set(connection = "con", max.print = 5)
 ```
 
-
 # Introduction to `DBI` 
+## Connecting
+
+### `DBI`
+Use `dbConnect()` to open a database connection
+```{r}
+con <- dbConnect(RSQLite::SQLite(), "mydatabase.sqlite")
+```
+
+Use `dbDisconnect()` to close a database connection
+```{r}
+dbDisconnect(con)
+```
+
+### `connections`
+Use `connection_open()` to open a database connection
+```{r}
+con <- connection_open(RSQLite::SQLite(), "mydatabase.sqlite")
+```
+
+Use `connection_close()` to close a database connection
+```{r}
+connection_close(con)
+```
 
 ## Local database basics
 *Connecting and adding data to a database*
 
-Use `dbConnect` to open a database connection
+Use `connection_open()` to open a database connection
 ```{r}
-con <- dbConnect(RSQLite::SQLite(), "mydatabase.sqlite")
+con <- connection_open(RSQLite::SQLite(), "mydatabase.sqlite")
 ```
     
 Use `dbListTables()` to view existing tables, there should be 0 tables
 ```{r}
-dbListTables(con)
+dbListTables(con@con)
 ```
 
 Use `dbWriteTable()` to create a new table using `mtcars` data. Name it **db_mtcars**
@@ -32,7 +55,7 @@ dbWriteTable(con, "db_mtcars", mtcars)
 
 Use `dbListTables()` to view existing tables, it should return **db_mtcars**
 ```{r}
-dbListTables(con)
+dbListTables(con@con)
 ```
 
 Use `dbGetQuery()` to pass a SQL query to the database
@@ -40,17 +63,17 @@ Use `dbGetQuery()` to pass a SQL query to the database
 dbGetQuery(con, "select * from db_mtcars")
 ```
 
-Close the database connection using `dbDisconnect()`
+Close the database connection using `connection_close()`
 ```{r}
-dbDisconnect(con)
+connection_close(con)
 ```
 
 ## Options for writing tables
 *Understand how certain arguments in `dbWriteTable()` work*
 
-Use `dbConnect()` to open a Database connection again
+Use `connection_open()` to open a Database connection again
 ```{r}
-con <- dbConnect(RSQLite::SQLite(), "mydatabase.sqlite")
+con <- connection_open(RSQLite::SQLite(), "mydatabase.sqlite")
 ```
 
 Use `dbWriteTable()` to re-create the **db_mtcars** table using `mtcars` data
@@ -188,7 +211,7 @@ select * from db_mtcars
 local_mtcars
 ```
 
-Close the database connection using `dbDisconnect()`
+Close the database connection using `connection_close()`
 ```{r, eval = TRUE}
-dbDisconnect(con)
+connection_close(con)
 ```

@@ -1,0 +1,105 @@
+---
+title: "dplyr"
+output: html_notebook
+---
+
+```{r setup}
+library(dplyr)
+library(readr)
+library(purrr)
+library(fs)
+```
+
+# Introduction to `dplyr`
+
+## `dplyr` basics
+*Load data into R via `readr`*
+
+Read the **transactions.csv** file, from the **../data** folder. Use the `read_csv()` function to load the data into a variable called `transactions`
+```{r}
+transactions <- dir_ls("../data", glob = "*.csv") %>%
+   map_dfr(read_csv)
+```
+
+Preview the data using `glimpse()`
+```{r}
+glimpse(transactions)
+```
+
+## `dplyr` syntax
+*How dplyr verbs (functions) can be used to analyze data*
+
+Use `dplyr` verbs to obtain the total sales by month
+```{r}
+transactions %>%
+  group_by(date_month) %>%
+  summarise(total_sales = sum(price))
+```
+
+Load the above code into a variable called `by_month`
+```{r}
+by_month <- transactions %>%
+  group_by(date_month) %>%
+  summarise(total_sales = sum(price))
+```
+    
+Create a new column using `mutate()`
+```{r}
+transactions %>%
+  group_by(order_id) %>% 
+  mutate(order_total = sum(price))
+```
+
+Count how many observations there are for each date
+```{r}
+transactions %>% 
+  count(date)
+```
+
+
+## Visualization
+
+Load the `ggplot2` library
+```{r}
+library(ggplot2)
+```
+
+Use `as_tibble()` to convert before creating a line plot 
+```{r}
+by_month %>%
+  ggplot() +
+  geom_line(aes(date_month, total_sales))
+```
+
+## Pivot data
+*Review a simple way to aggregate data faster, and then pivot it as a tibble*
+
+Load the `tidyr` library
+```{r}
+library(tidyr)
+```
+
+Group `transactions` by `date_month` and `date_day`, then aggregate `price` into `total_sales`
+```{r}
+transactions %>%
+  group_by(date_month, date_day) %>% 
+  summarise(total_sales = sum(price))
+```
+
+Copy the aggregation code above and use `pivot_wider()` to make the `date_day` the column headers.
+```{r}
+transactions %>%
+  mutate(date_day = factor(date_day, levels = c(
+    "Monday", 
+    "Tuesday", 
+    "Wednesday", 
+    "Thursday", 
+    "Friday", 
+    "Saturday", 
+    "Sunday"
+  ))) %>%
+  group_by(date_month, date_day) %>% 
+  summarise(total_sales = sum(price)) %>%
+  pivot_wider(names_from = date_day, values_from = total_sales)
+  # select(date_month, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
+```

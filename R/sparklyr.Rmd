@@ -74,3 +74,8 @@ fit <- partitions$training %>%
   ml_linear_regression(response = "mpg", features = c("wt", "cyl"))
 fit
 ```
+
+## Disconnect
+```{r}
+spark_disconnect(sc)
+```
