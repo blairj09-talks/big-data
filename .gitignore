@@ -3,6 +3,6 @@
 .RData
 .Ruserdata
 *.nb.html
-config.yml
 logs
 spark-warehouse
+*.sqlite
