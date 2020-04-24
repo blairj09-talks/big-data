@@ -7,6 +7,7 @@ output: html_notebook
 library(sparklyr)
 library(ggplot2)
 library(nycflights13)
+library(dplyr)
 ```
 
 # Using `sparklyr`
