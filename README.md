@@ -14,7 +14,7 @@ insight using a familiar and consistent set of tools.
 
 ### About
 This repository contains a collection of slides and example code used for talks
-given about working with Big Data in R.
+and workshops given about working with Big Data in R.
 
 ### Usage
 This repository uses the
@@ -24,8 +24,6 @@ dependency management. The necessary R dependencies can be installed by running
 
 ### Topics
 * [dplyr](https://dplyr.tidyverse.org/)
-* [arrow](https://arrow.apache.org/)
-* [vroom](https://vroom.r-lib.org/)
 * [data.table](https://rdatatable.gitlab.io/data.table/)
 * [dtplyr](https://dtplyr.tidyverse.org/)
 * [DBI](https://dbi.r-dbi.org/)
