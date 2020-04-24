@@ -1,0 +1,81 @@
+---
+title: "sparklyr"
+output: html_document
+---
+
+```{r setup}
+library(sparklyr)
+library(ggplot2)
+library(nycflights13)
+```
+
+# Using `sparklyr`
+
+Comprehensive examples and documentation for using Spark and `sparklyr` can be
+found at spark.rstudio.com.
+
+## Connect
+Connect to Spark using `spark_connect()`. In this case we start and connect to a
+local Spark cluster.
+```{r}
+sc <- spark_connect(master = "local")
+```
+
+The RStudio Connections pane should now show an active connection to a Spark
+session.
+
+## Transfer data to Spark
+In most cases, data will already be available in Spark, but in this case we are
+working with a fresh, local Spark cluster so we need to populate it with data.
+```{r}
+iris_tbl <- copy_to(sc, iris)
+flights_tbl <- copy_to(sc, flights, "flights")
+src_tbls(sc)
+```
+
+## Use `sparklyr` to investigate data
+
+```{r}
+class(flights_tbl)
+```
+
+```{r}
+flights_tbl %>% 
+  filter(dep_delay == 2)
+```
+
+```{r}
+delay <- flights_tbl %>% 
+  group_by(tailnum) %>%
+  summarise(count = n(), dist = mean(distance), delay = mean(arr_delay)) %>%
+  filter(count > 20, dist < 2000, !is.na(delay)) %>%
+  collect()
+
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth() +
+  scale_size_area(max_size = 2)
+```
+
+## Machine learning with Spark
+Example available at spark.rstudio.com
+```{r}
+# copy mtcars into spark
+mtcars_tbl <- copy_to(sc, mtcars, overwrite = TRUE)
+
+# transform our data set, and then partition into 'training', 'test'
+partitions <- mtcars_tbl %>%
+  filter(hp >= 100) %>%
+  mutate(cyl8 = cyl == 8) %>%
+  sdf_random_split(training = 0.5, test = 0.5, seed = 1099)
+
+# fit a linear model to the training dataset
+fit <- partitions$training %>%
+  ml_linear_regression(response = "mpg", features = c("wt", "cyl"))
+fit
+```
+
+## Disconnect
+```{r}
+spark_disconnect(sc)
+```
