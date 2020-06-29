@@ -8,7 +8,7 @@ insight using a familiar and consistent set of tools.
 
 ---
 
-![title slide](img/title-slide.jpg)
+[![title slide](img/title-slide.jpg)](slides/big-data-slides.pdf)
 
 ---
 
