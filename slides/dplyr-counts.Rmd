@@ -1,0 +1,37 @@
+---
+title: "dplyr downloads"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(cranlogs)
+```
+
+```{r data}
+downloads <- cran_downloads(packages = "dplyr", from = "2014-01-17", to = "2021-05-25")
+```
+
+```{r}
+downloads <- downloads |> 
+  mutate(cummulative = cumsum(count))
+```
+
+```{r}
+downloads |> 
+  ggplot(aes(x = date, y = cummulative)) +
+  geom_line() +
+  geom_hline(yintercept = max(downloads$cummulative), col = "red") +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank()) +
+  scale_y_continuous(breaks = max(downloads$cummulative), labels = scales::comma) +
+  labs(title = "dplyr CRAN downloads", caption = "data collected using the cranlogs R package")
+```
+
+```{r}
+ggsave("dplyr-counts.png", width = 4, height = 6)
+```
+
+
+
