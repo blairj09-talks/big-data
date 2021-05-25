@@ -41,15 +41,15 @@ class(flights_tbl)
 ```
 
 ```{r}
-flights_tbl %>% 
+flights_tbl |> 
   filter(dep_delay == 2)
 ```
 
 ```{r}
-delay <- flights_tbl %>% 
-  group_by(tailnum) %>%
-  summarise(count = n(), dist = mean(distance), delay = mean(arr_delay)) %>%
-  filter(count > 20, dist < 2000, !is.na(delay)) %>%
+delay <- flights_tbl |> 
+  group_by(tailnum) |>
+  summarise(count = n(), dist = mean(distance), delay = mean(arr_delay)) |>
+  filter(count > 20, dist < 2000, !is.na(delay)) |>
   collect()
 
 ggplot(delay, aes(dist, delay)) +
@@ -65,13 +65,13 @@ Example available at spark.rstudio.com
 mtcars_tbl <- copy_to(sc, mtcars, overwrite = TRUE)
 
 # transform our data set, and then partition into 'training', 'test'
-partitions <- mtcars_tbl %>%
-  filter(hp >= 100) %>%
-  mutate(cyl8 = cyl == 8) %>%
+partitions <- mtcars_tbl |>
+  filter(hp >= 100) |>
+  mutate(cyl8 = cyl == 8) |>
   sdf_random_split(training = 0.5, test = 0.5, seed = 1099)
 
 # fit a linear model to the training dataset
-fit <- partitions$training %>%
+fit <- partitions$training |>
   ml_linear_regression(response = "mpg", features = c("wt", "cyl"))
 fit
 ```
