@@ -1,0 +1,54 @@
+---
+title: "arrow"
+output: html_notebook
+---
+
+```{r setup}
+library(arrow)
+library(ggplot2)
+library(nycflights13)
+library(dplyr)
+```
+
+# Using `arrow`
+
+Comprehensive examples and documentation for using Apache Arrow with R can be
+found at https://arrow.apache.org/docs/r/. This example will specifically explore
+working with out-of-memory data in R.
+
+## Connect to the data directory
+```{r}
+ds <- open_dataset("../data/", format = "csv")
+class(ds)
+```
+
+## View the `Dataset` object
+```{r}
+ds
+```
+
+## View memory footprint of `ds`
+```{r}
+lobstr::obj_size(ds)
+```
+
+```{r}
+local_ds <- collect(ds)
+lobstr::obj_size(local_ds)
+```
+
+## Use `dplyr` to manipulate the `Dataset` object
+Note: *In the current release, arrow supports the dplyr verbs `mutate()`,
+`transmute()`, `select()`, `rename()`, `relocate()`, `filter()`, and
+`arrange()`. Aggregation is not yet supported, so before you call `summarise()`
+or other verbs with aggregate functions, use `collect()` to pull the selected
+subset of the data into an in-memory R data frame.*
+
+```{r}
+(first_months <- ds |>
+  filter(date_month <= 6))
+```
+
+Since summarization functions are not yet supported, this approach is best
+suited for filtering and subsetting data to get it to a manageable size prior to
+bringing it into R for summarization and further analysis.
