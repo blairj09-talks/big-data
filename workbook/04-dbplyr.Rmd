@@ -88,15 +88,15 @@ Queries can be assigned to variables. Create a variable called `orders_head` tha
 
 Use `sql_render()` and `simulate_mssql()` to see how the SQL statement changes from vendor to vendor
 ```{r}
-orders |>
-  head() |>
+orders %>%
+  head() %>%
   sql_render(con = simulate_mssql()) 
 ```
 
 Use `explain()` to explore the query plan
 ```{r}
-orders |> 
-  head() |> 
+orders %>% 
+  head() %>% 
   explain()
 ```
     
@@ -105,8 +105,8 @@ orders |>
 
 Preview how `mean` is translated
 ```{r}
-orders |> 
-  mutate(avg_id = mean(order_id, na.rm = TRUE)) |> 
+orders %>% 
+  mutate(avg_id = mean(order_id, na.rm = TRUE)) %>% 
   show_query()
 ```
 
@@ -117,15 +117,15 @@ Preview how `Sys.Date()` is translated
 
 Use PostgreSQL native commands, in this case `date`
 ```{r}
-orders |>
-  mutate(today = date('now')) |>
+orders %>%
+  mutate(today = date('now')) %>%
   show_query()
 ```
 
 Run the `dplyr` code to confirm it works
 ```{r}
-orders |>
-  mutate(today = date('now')) |>
+orders %>%
+  mutate(today = date('now')) %>%
   head()
 ```
 
@@ -134,15 +134,15 @@ orders |>
 
 Preview how `Sys.Date()` is translated when prefixing `!!`
 ```{r}
-orders |>
-  mutate(today = !!Sys.Date()) |>
+orders %>%
+  mutate(today = !!Sys.Date()) %>%
   show_query()
 ```
 
 View resulting table when `Sys.Date()` is translated when prefixing `!!`
 ```{r}
-orders |>
-  mutate(today = !!Sys.Date()) |>
+orders %>%
+  mutate(today = !!Sys.Date()) %>%
   head()
 ```
 

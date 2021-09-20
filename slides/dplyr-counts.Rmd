@@ -13,12 +13,12 @@ downloads <- cran_downloads(packages = "dplyr", from = "2014-01-17", to = "2021-
 ```
 
 ```{r}
-downloads <- downloads |> 
+downloads <- downloads %>% 
   mutate(cummulative = cumsum(count))
 ```
 
 ```{r}
-downloads |> 
+downloads %>% 
   ggplot(aes(x = date, y = cummulative)) +
   geom_line() +
   geom_hline(yintercept = max(downloads$cummulative), col = "red") +

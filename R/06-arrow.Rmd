@@ -45,7 +45,7 @@ or other verbs with aggregate functions, use `collect()` to pull the selected
 subset of the data into an in-memory R data frame.*
 
 ```{r}
-(first_months <- ds |>
+(first_months <- ds %>%
   filter(date_month <= 6))
 ```
 
